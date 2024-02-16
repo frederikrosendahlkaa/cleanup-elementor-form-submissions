@@ -7,6 +7,7 @@
  * Author URI: https://nordiccustommade.dk
  * Text Domain: ncm-elementor-cleanup-form-entries
  * Domain Path: /languages
+ * Requires Plugins: elementor
  * License: GPL2
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  */
