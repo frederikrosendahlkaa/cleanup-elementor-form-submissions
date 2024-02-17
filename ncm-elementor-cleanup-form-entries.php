@@ -214,6 +214,7 @@ class ncm_elementor_cleanup_form_entries {
             <option value="days" <?php selected( $type, 'days' ); ?>><?php echo esc_html__( 'Days', 'ncm-elementor-cleanup-form-entries' ); ?></option>
             <option value="weeks" <?php selected( $type, 'weeks' ); ?>><?php echo esc_html__( 'Weeks', 'ncm-elementor-cleanup-form-entries' ); ?></option>
             <option value="months" <?php selected( $type, 'months' ); ?>><?php echo esc_html__( 'Months', 'ncm-elementor-cleanup-form-entries' ); ?></option>
+            <option value="quaters" <?php selected( $type, 'quaters' ); ?>><?php echo esc_html__( 'Quaters', 'ncm-elementor-cleanup-form-entries' ); ?></option>
             <option value="years" <?php selected( $type, 'years' ); ?>><?php echo esc_html__( 'Years', 'ncm-elementor-cleanup-form-entries' ); ?></option>
         </select>
         <?php
@@ -272,6 +273,9 @@ class ncm_elementor_cleanup_form_entries {
                         break;
                     case 'months':
                         $scheduled_type = 'MONTH';
+                        break;
+                    case 'quaters':
+                        $scheduled_type = 'QUARTER';
                         break;
                     case 'years':
                         $scheduled_type = 'YEAR';
