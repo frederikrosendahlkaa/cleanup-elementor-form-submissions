@@ -20,8 +20,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 //create class ncm_elementor_cleanup_form_entries
 class ncm_elementor_cleanup_form_entries {
     
+    //private
+    private $options;
     
     public function __construct() {
+
+        //if option ncm_elementor_cleanup_form_entries_settings is not set, set default value.
+        if ( get_option( 'ncm_elementor_cleanup_form_entries_settings' ) ) {
+            $this->options = get_option( 'ncm_elementor_cleanup_form_entries_settings' );
+        }
 
         register_activation_hook( __FILE__, array( $this, 'plugins_activation' ) );
 
@@ -43,14 +50,13 @@ class ncm_elementor_cleanup_form_entries {
 
     //activate plugin
     public function plugins_activation() {
-        $options = get_option( 'ncm_elementor_cleanup_form_entries_settings' );
+        $options = $this->options;
         if ( ! $options ) {
             $options = array(
                 'days' => 30,
             );
             update_option( 'ncm_elementor_cleanup_form_entries_settings', $options );
         }
-        $this->entries_schedule_event();
     }
 
     //deactivate plugin
@@ -135,10 +141,35 @@ class ncm_elementor_cleanup_form_entries {
      * Register settings.
      */
     public function cleanup_form_entries_settings() {
-        register_setting( 'cleanup_form_entries_settings', 'cleanup_form_entries_settings' );
+        register_setting( 'cleanup_form_entries_settings', 'ncm_elementor_cleanup_form_entries_settings', array( $this, 'sanitize_settings' ) );
         add_settings_section( 'cleanup_form_entries_settings_section', '', '', 'cleanup_form_entries_settings' );
+        add_settings_field( 'cleanup_form_entries_field_activate', esc_html__( 'Activate Cleanup', 'ncm-elementor-cleanup-form-entries' ), array( $this, 'setting_field_activate' ), 'cleanup_form_entries_settings', 'cleanup_form_entries_settings_section' );
         add_settings_field( 'cleanup_form_entries_settings_field', esc_html__( 'Number of days to keep', 'ncm-elementor-cleanup-form-entries' ), array( $this, 'cleanup_form_entries_settings_field' ), 'cleanup_form_entries_settings', 'cleanup_form_entries_settings_section' );
     }
+
+    //function to check if cleanup is active.
+    private function check_if_cleanup_is_active() {
+        $options = $this->options;
+        if ( $options AND is_array( $options ) AND key_exists( 'active', $options ) AND $options['active'] == 'on') {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Settings field.
+     * Activate or deactivate the cleanup.
+     * true/false
+     */
+    public function setting_field_activate() {
+        
+        $active = $this->check_if_cleanup_is_active();        
+        ?>
+        <input type="checkbox" name="ncm_elementor_cleanup_form_entries_settings[active]" <?php checked( $active, '1' ); ?> />
+        <?php
+    }
+    
 
     /**
      * Settings field.
@@ -153,6 +184,13 @@ class ncm_elementor_cleanup_form_entries {
 
     // Schedule an action if it's not already scheduled.
     public function entries_schedule_event() {
+
+        //if cleanup is not active, don't proceed.
+        if ( !$this->check_if_cleanup_is_active() ) {
+            wp_clear_scheduled_hook( 'ncm_elementor_cleanup_form_entries_event' );
+            return;
+        }
+
         if ( ! wp_next_scheduled( 'ncm_elementor_cleanup_form_entries_event' ) ) {
             wp_schedule_event( time(), 'hourly', 'ncm_elementor_cleanup_form_entries_event' );
         }
@@ -162,6 +200,11 @@ class ncm_elementor_cleanup_form_entries {
     public function entries_delete_entries() {
         // if elementor or elementor pro is not active, don't proceed.
         if ( ! did_action( 'elementor/loaded' ) ) {
+            return;
+        }
+
+        // if cleanup is not active, don't proceed.
+        if ( !$this->check_if_cleanup_is_active() ) {
             return;
         }
 
