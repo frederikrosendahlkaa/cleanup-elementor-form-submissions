@@ -7,7 +7,7 @@
  * Author URI: https://nordiccustommade.dk
  * Text Domain: ncm-elementor-cleanup-form-entries
  * Domain Path: /languages
- * Requires Plugins: elementor
+ * Requires Plugins: elementor, elementor-pro
  * License: GPL2
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  */
@@ -179,23 +179,39 @@ class ncm_elementor_cleanup_form_entries {
 
         global $wpdb;
         $table_name = $wpdb->prefix . 'e_submissions';
+        //check if table prefix.e_submissions exists
+        if ( $wpdb->get_var( "SHOW TABLES LIKE '$table_name'" ) != $table_name ) {
+            return;
+        }
+
         //get list of ids of form entries older than selected days.
         $sql = "SELECT id FROM $table_name WHERE created_at < DATE_SUB( NOW(), INTERVAL $days DAY )";
         $ids = $wpdb->get_col( $sql );
-        
+
         //delete form entries older than selected days.
+
+        if ( !$ids OR !is_array( $ids ) OR count( $ids ) == 0 ) {
+            return;
+        }
+        
         $sql = "DELETE FROM $table_name WHERE id IN ( " . implode( ',', $ids ) . " )";
         $wpdb->query( $sql );
 
         //delete from prefix.e_submissions_actions_log submition_id
         $table_name = $wpdb->prefix . 'e_submissions_actions_log';
-        $sql = "DELETE FROM $table_name WHERE submission_id IN ( " . implode( ',', $ids ) . " )";
-        $wpdb->query( $sql );
+        //check if table prefix.e_submissions_actions_log exists
+        if ( $wpdb->get_var( "SHOW TABLES LIKE '$table_name'" ) == $table_name ) {
+            $sql = "DELETE FROM $table_name WHERE submission_id IN ( " . implode( ',', $ids ) . " )";
+            $wpdb->query( $sql );
+        }
 
         //delete from prefix.e_submissions_values submition_id
         $table_name = $wpdb->prefix . 'e_submissions_values';
-        $sql = "DELETE FROM $table_name WHERE submission_id IN ( " . implode( ',', $ids ) . " )";
-        $wpdb->query( $sql );
+        //check if table prefix.e_submissions_values exists
+        if ( $wpdb->get_var( "SHOW TABLES LIKE '$table_name'" ) == $table_name ) {
+            $sql = "DELETE FROM $table_name WHERE submission_id IN ( " . implode( ',', $ids ) . " )";
+            $wpdb->query( $sql );
+        }
 
     }
 
