@@ -33,7 +33,11 @@ class ncm_elementor_cleanup_form_entries {
 
         add_action( 'admin_init', array( $this, 'cleanup_form_entries_settings' ) );
 
-        add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array ( $this, 'plugin_action_links' ) );
+        add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'plugin_action_links' ) );
+
+        add_action( 'wp', array( $this, 'entries_schedule_event' ) );
+
+        add_action( 'ncm_elementor_cleanup_form_entries_event', array( $this, 'entries_delete_entries' ) );
 
     }
 
@@ -46,7 +50,7 @@ class ncm_elementor_cleanup_form_entries {
             );
             update_option( 'ncm_elementor_cleanup_form_entries_settings', $options );
         }
-        ncm_elementor_cleanup_form_entries_schedule_event();
+        $this->entries_schedule_event();
     }
 
     //deactivate plugin
@@ -139,7 +143,7 @@ class ncm_elementor_cleanup_form_entries {
     /**
      * Settings field.
      */
-    function cleanup_form_entries_settings_field() {
+    public function cleanup_form_entries_settings_field() {
         $options = get_option( 'ncm_elementor_cleanup_form_entries_settings' );
         $days = isset( $options['days'] ) ? $options['days'] : 30;
         ?>
@@ -147,73 +151,54 @@ class ncm_elementor_cleanup_form_entries {
         <?php
     }
 
+    // Schedule an action if it's not already scheduled.
+    public function entries_schedule_event() {
+        if ( ! wp_next_scheduled( 'ncm_elementor_cleanup_form_entries_event' ) ) {
+            wp_schedule_event( time(), 'hourly', 'ncm_elementor_cleanup_form_entries_event' );
+        }
+    }
+
+    //delete all form entries older than selected days.
+    public function entries_delete_entries() {
+        // if elementor or elementor pro is not active, don't proceed.
+        if ( ! did_action( 'elementor/loaded' ) ) {
+            return;
+        }
+
+        /**
+         * Delete from prefix.e_submissions 
+         * Delete prefix.e_submissions_actions_log submition_id
+         * Delete prefix.e_submissions_values submition_id
+         * ncm_elementor_cleanup_form_entries_settings days 
+         */
+        $days = 30;
+        $options = get_option( 'ncm_elementor_cleanup_form_entries_settings' );
+        if ( $options AND isset( $options['days'] ) ) {
+            $days = $options['days'];
+        }
+
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'e_submissions';
+        //get list of ids of form entries older than selected days.
+        $sql = "SELECT id FROM $table_name WHERE created_at < DATE_SUB( NOW(), INTERVAL $days DAY )";
+        $ids = $wpdb->get_col( $sql );
+        
+        //delete form entries older than selected days.
+        $sql = "DELETE FROM $table_name WHERE id IN ( " . implode( ',', $ids ) . " )";
+        $wpdb->query( $sql );
+
+        //delete from prefix.e_submissions_actions_log submition_id
+        $table_name = $wpdb->prefix . 'e_submissions_actions_log';
+        $sql = "DELETE FROM $table_name WHERE submission_id IN ( " . implode( ',', $ids ) . " )";
+        $wpdb->query( $sql );
+
+        //delete from prefix.e_submissions_values submition_id
+        $table_name = $wpdb->prefix . 'e_submissions_values';
+        $sql = "DELETE FROM $table_name WHERE submission_id IN ( " . implode( ',', $ids ) . " )";
+        $wpdb->query( $sql );
+
+    }
+
 }
 
 new ncm_elementor_cleanup_form_entries();
-
-/**
- * Create a new cron schedule.
- * Run every 1 hour.
- */
-function ncm_elementor_cleanup_form_entries_cron_schedule( $schedules ) {
-    $schedules['every_one_hour'] = array(
-        'interval' => 3600,
-        'display'  => esc_html__( 'Every 1 hour', 'ncm-elementor-cleanup-form-entries' ),
-    );
-    return $schedules;
-}
-add_filter( 'cron_schedules', 'ncm_elementor_cleanup_form_entries_cron_schedule' );
-
-/**
- * Schedule an action if it's not already scheduled.
- */
-function ncm_elementor_cleanup_form_entries_schedule_event() {
-    if ( ! wp_next_scheduled( 'ncm_elementor_cleanup_form_entries_event' ) ) {
-        wp_schedule_event( time(), 'every_one_hour', 'ncm_elementor_cleanup_form_entries_event' );
-    }
-}
-add_action( 'wp', 'ncm_elementor_cleanup_form_entries_schedule_event' );
-
-/**
- * Delete all form entries older than 30 days.
- */
-function ncm_elementor_cleanup_form_entries_delete_entries() {
-    // if elementor or elementor pro is not active, don't proceed.
-    if ( ! did_action( 'elementor/loaded' ) ) {
-        return;
-    }
-
-    /**
-     * Delete from prefix.e_submissions 
-     * Delete prefix.e_submissions_actions_log submition_id
-     * Delete prefix.e_submissions_values submition_id
-     * ncm_elementor_cleanup_form_entries_settings days 
-     */
-    $days = 30;
-    $options = get_option( 'ncm_elementor_cleanup_form_entries_settings' );
-    if ( $options AND isset( $options['days'] ) ) {
-        $days = $options['days'];
-    }
-
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'e_submissions';
-    //get list of ids of form entries older than selected days.
-    $sql = "SELECT id FROM $table_name WHERE created_at < DATE_SUB( NOW(), INTERVAL $days DAY )";
-    $ids = $wpdb->get_col( $sql );
-    
-    //delete form entries older than selected days.
-    $sql = "DELETE FROM $table_name WHERE id IN ( " . implode( ',', $ids ) . " )";
-    $wpdb->query( $sql );
-
-    //delete from prefix.e_submissions_actions_log submition_id
-    $table_name = $wpdb->prefix . 'e_submissions_actions_log';
-    $sql = "DELETE FROM $table_name WHERE submission_id IN ( " . implode( ',', $ids ) . " )";
-    $wpdb->query( $sql );
-
-    //delete from prefix.e_submissions_values submition_id
-    $table_name = $wpdb->prefix . 'e_submissions_values';
-    $sql = "DELETE FROM $table_name WHERE submission_id IN ( " . implode( ',', $ids ) . " )";
-    $wpdb->query( $sql );
-
-}
-add_action( 'ncm_elementor_cleanup_form_entries_event', 'ncm_elementor_cleanup_form_entries_delete_entries' );
