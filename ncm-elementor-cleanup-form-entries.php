@@ -22,12 +22,13 @@ class ncm_elementor_cleanup_form_entries {
     
     //private
     private $options;
+    public $options_name = 'ncm_elementor_cleanup_form_entries_settings';
     
     public function __construct() {
 
-        //if option ncm_elementor_cleanup_form_entries_settings is not set, set default value.
-        if ( get_option( 'ncm_elementor_cleanup_form_entries_settings' ) ) {
-            $this->options = get_option( 'ncm_elementor_cleanup_form_entries_settings' );
+        //if option $this->options_name is not set, set default value.
+        if ( get_option( $this->options_name ) ) {
+            $this->options = get_option( $this->options_name );
         }
 
         register_activation_hook( __FILE__, array( $this, 'plugins_activation' ) );
@@ -55,15 +56,15 @@ class ncm_elementor_cleanup_form_entries {
             $options = array(
                 'days' => 30,
             );
-            update_option( 'ncm_elementor_cleanup_form_entries_settings', $options );
+            update_option( $this->options_name, $options );
         }
     }
 
     //deactivate plugin
     public function plugin_deactivation() {
         wp_clear_scheduled_hook( 'ncm_elementor_cleanup_form_entries_event' );
-        // delete option ncm_elementor_cleanup_form_entries_settings
-        delete_option( 'ncm_elementor_cleanup_form_entries_settings' );
+        // delete option $this->options_name
+        delete_option( $this->options_name );
     }
 
     //load plugin textdomain
@@ -121,7 +122,7 @@ class ncm_elementor_cleanup_form_entries {
         <?php   
 
         //add button to manually delete all form entries older than selected days.
-        $options = get_option( 'ncm_elementor_cleanup_form_entries_settings' );
+        $options = $this->options;
         $days = isset( $options['days'] ) ? $options['days'] : 30;
         ?>
         <form action="" method="post">
@@ -141,7 +142,7 @@ class ncm_elementor_cleanup_form_entries {
      * Register settings.
      */
     public function cleanup_form_entries_settings() {
-        register_setting( 'cleanup_form_entries_settings', 'ncm_elementor_cleanup_form_entries_settings', array( $this, 'sanitize_settings' ) );
+        register_setting( 'cleanup_form_entries_settings', $this->options_name, array( $this, 'sanitize_settings' ) );
         add_settings_section( 'cleanup_form_entries_settings_section', '', '', 'cleanup_form_entries_settings' );
         add_settings_field( 'cleanup_form_entries_field_activate', esc_html__( 'Activate Cleanup', 'ncm-elementor-cleanup-form-entries' ), array( $this, 'setting_field_activate' ), 'cleanup_form_entries_settings', 'cleanup_form_entries_settings_section' );
         add_settings_field( 'cleanup_form_entries_settings_field', esc_html__( 'Number of days to keep', 'ncm-elementor-cleanup-form-entries' ), array( $this, 'cleanup_form_entries_settings_field' ), 'cleanup_form_entries_settings', 'cleanup_form_entries_settings_section' );
@@ -162,11 +163,10 @@ class ncm_elementor_cleanup_form_entries {
      * Activate or deactivate the cleanup.
      * true/false
      */
-    public function setting_field_activate() {
-        
+    public function setting_field_activate() {        
         $active = $this->check_if_cleanup_is_active();        
         ?>
-        <input type="checkbox" name="ncm_elementor_cleanup_form_entries_settings[active]" <?php checked( $active, '1' ); ?> />
+        <input type="checkbox" name="<?php echo $this->options_name; ?>[active]" <?php checked( $active, '1' ); ?> />
         <?php
     }
     
@@ -175,10 +175,10 @@ class ncm_elementor_cleanup_form_entries {
      * Settings field.
      */
     public function cleanup_form_entries_settings_field() {
-        $options = get_option( 'ncm_elementor_cleanup_form_entries_settings' );
+        $options = $this->options;
         $days = isset( $options['days'] ) ? $options['days'] : 30;
         ?>
-        <input type="number" name="ncm_elementor_cleanup_form_entries_settings[days]" value="<?php echo esc_attr( $days ); ?>" min="1" max="365" />
+        <input type="number" name="<?php echo $this->options_name; ?>[days]" value="<?php echo esc_attr( $days ); ?>" min="1" max="365" />
         <?php
     }
 
@@ -212,10 +212,9 @@ class ncm_elementor_cleanup_form_entries {
          * Delete from prefix.e_submissions 
          * Delete prefix.e_submissions_actions_log submition_id
          * Delete prefix.e_submissions_values submition_id
-         * ncm_elementor_cleanup_form_entries_settings days 
          */
         $days = 30;
-        $options = get_option( 'ncm_elementor_cleanup_form_entries_settings' );
+        $options = $this->options;
         if ( $options AND isset( $options['days'] ) ) {
             $days = $options['days'];
         }
