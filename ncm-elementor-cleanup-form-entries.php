@@ -54,7 +54,10 @@ class ncm_elementor_cleanup_form_entries {
         $options = $this->options;
         if ( ! $options ) {
             $options = array(
-                'days' => 30,
+                'scheduled' => array(  
+                    'type' => 'days',
+                    'value' => 30
+                )
             );
             update_option( $this->options_name, $options );
         }
@@ -123,7 +126,12 @@ class ncm_elementor_cleanup_form_entries {
 
         //add button to manually delete all form entries older than selected days.
         $options = $this->options;
-        $days = isset( $options['days'] ) ? $options['days'] : 30;
+        $keep_info = '';
+        if ( $options AND is_array( $options ) AND key_exists( 'scheduled', $options ) ) {
+            if ( key_exists( 'value', $options['scheduled'] ) ) {
+                $keep_info = $options['scheduled']['value'].' '.$options['scheduled']['type'];
+            }
+        }
 
         //if cleanup is not active set cleanup button to disabled.
         $disbled = '';
@@ -134,7 +142,7 @@ class ncm_elementor_cleanup_form_entries {
         ?>
         <form action="" method="post">
             <input type="hidden" name="ncm_elementor_cleanup_form_entries_nonce" value="<?php echo wp_create_nonce( 'ncm_elementor_cleanup_form_entries_nonce' ); ?>" />
-            <input class="button button-primary" type="submit" name="ncm_elementor_cleanup_form_entries_delete" <?php echo $disbled; ?> value="<?php echo __( 'Delete all form entries older then', 'ncm-elementor-cleanup-form-entries' ).' '.$days.' '.__( 'days', 'ncm-elementor-cleanup-form-entries' ); ?>" />
+            <input class="button button-primary" type="submit" name="ncm_elementor_cleanup_form_entries_delete" <?php echo $disbled; ?> value="<?php echo __( 'Delete all form entries older then', 'ncm-elementor-cleanup-form-entries' ).' '.$keep_info; ?>" />
         </form>
         <?php
 
@@ -152,7 +160,7 @@ class ncm_elementor_cleanup_form_entries {
         register_setting( 'cleanup_form_entries_settings', $this->options_name, array( $this, 'sanitize_settings' ) );
         add_settings_section( 'cleanup_form_entries_settings_section', '', '', 'cleanup_form_entries_settings' );
         add_settings_field( 'cleanup_form_entries_field_activate', esc_html__( 'Activate Cleanup', 'ncm-elementor-cleanup-form-entries' ), array( $this, 'setting_field_activate' ), 'cleanup_form_entries_settings', 'cleanup_form_entries_settings_section' );
-        add_settings_field( 'cleanup_form_entries_settings_field', esc_html__( 'Number of days to keep', 'ncm-elementor-cleanup-form-entries' ), array( $this, 'cleanup_form_entries_settings_field' ), 'cleanup_form_entries_settings', 'cleanup_form_entries_settings_section' );
+        add_settings_field( 'cleanup_form_entries_settings_field', esc_html__( 'How long submissions must be kept', 'ncm-elementor-cleanup-form-entries' ), array( $this, 'cleanup_form_entries_settings_field' ), 'cleanup_form_entries_settings', 'cleanup_form_entries_settings_section' );
     }
 
     //function to check if cleanup is active.
@@ -182,10 +190,32 @@ class ncm_elementor_cleanup_form_entries {
      * Settings field.
      */
     public function cleanup_form_entries_settings_field() {
+
+        $value = 30;
+        $type = 'days';
+
         $options = $this->options;
-        $days = isset( $options['days'] ) ? $options['days'] : 30;
+        if ( $options AND is_array( $options ) AND key_exists( 'scheduled', $options ) ) {
+
+            if ( key_exists( 'type', $options['scheduled'] ) ) {
+                $type = $options['scheduled']['type'];
+            }
+
+            if ( key_exists( 'value', $options['scheduled'] ) ) {
+                $value = $options['scheduled']['value'];
+            }
+
+        }
+
         ?>
-        <input type="number" name="<?php echo $this->options_name; ?>[days]" value="<?php echo esc_attr( $days ); ?>" min="1" max="365" />
+        <input type="number" name="<?php echo $this->options_name; ?>[scheduled][value]" value="<?php echo esc_attr( $value ); ?>" min="1" />
+        <select name="<?php echo $this->options_name; ?>[scheduled][type]">
+            <option value="hours" <?php selected( $type, 'hours' ); ?>><?php echo esc_html__( 'Hours', 'ncm-elementor-cleanup-form-entries' ); ?></option>
+            <option value="days" <?php selected( $type, 'days' ); ?>><?php echo esc_html__( 'Days', 'ncm-elementor-cleanup-form-entries' ); ?></option>
+            <option value="weeks" <?php selected( $type, 'weeks' ); ?>><?php echo esc_html__( 'Weeks', 'ncm-elementor-cleanup-form-entries' ); ?></option>
+            <option value="months" <?php selected( $type, 'months' ); ?>><?php echo esc_html__( 'Months', 'ncm-elementor-cleanup-form-entries' ); ?></option>
+            <option value="years" <?php selected( $type, 'years' ); ?>><?php echo esc_html__( 'Years', 'ncm-elementor-cleanup-form-entries' ); ?></option>
+        </select>
         <?php
     }
 
@@ -220,10 +250,39 @@ class ncm_elementor_cleanup_form_entries {
          * Delete prefix.e_submissions_actions_log submition_id
          * Delete prefix.e_submissions_values submition_id
          */
-        $days = 30;
+        $scheduled_value = false;
+        $scheduled_type = false;
         $options = $this->options;
-        if ( $options AND isset( $options['days'] ) ) {
-            $days = $options['days'];
+        if ( $options AND is_array( $options ) AND key_exists( 'scheduled', $options ) ) {
+            if ( key_exists( 'value', $options['scheduled'] ) ) {
+                $scheduled_value = $options['scheduled']['value'];
+            }
+            if ( key_exists( 'type', $options['scheduled'] ) ) {
+                $scheduled_type = $options['scheduled']['type'];
+                //convert type to sql interval type.
+                switch ( $scheduled_type ) {
+                    case 'hours':
+                        $scheduled_type = 'HOUR';
+                        break;
+                    case 'days':
+                        $scheduled_type = 'DAY';
+                        break;
+                    case 'weeks':
+                        $scheduled_type = 'WEEK';
+                        break;
+                    case 'months':
+                        $scheduled_type = 'MONTH';
+                        break;
+                    case 'years':
+                        $scheduled_type = 'YEAR';
+                        break;
+                }
+            }
+        }
+
+        //if scheduled_value and scheduled_type is not set, don't proceed.
+        if ( !$scheduled_value OR !$scheduled_type ) {
+            return;
         }
 
         global $wpdb;
@@ -233,11 +292,11 @@ class ncm_elementor_cleanup_form_entries {
             return;
         }
 
-        //get list of ids of form entries older than selected days.
-        $sql = "SELECT id FROM $table_name WHERE created_at < DATE_SUB( NOW(), INTERVAL $days DAY )";
+        //get list of ids of form entries older than selected $scheduled_value $scheduled_type.
+        $sql = "SELECT id FROM $table_name WHERE created_at < DATE_SUB( NOW(), INTERVAL $scheduled_value $scheduled_type )";
         $ids = $wpdb->get_col( $sql );
 
-        //delete form entries older than selected days.
+        //delete form entries older than selected $scheduled_value $scheduled_type.
 
         if ( !$ids OR !is_array( $ids ) OR count( $ids ) == 0 ) {
             return;
