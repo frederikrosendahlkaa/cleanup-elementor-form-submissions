@@ -124,10 +124,17 @@ class ncm_elementor_cleanup_form_entries {
         //add button to manually delete all form entries older than selected days.
         $options = $this->options;
         $days = isset( $options['days'] ) ? $options['days'] : 30;
+
+        //if cleanup is not active set cleanup button to disabled.
+        $disbled = '';
+        if ( !$this->check_if_cleanup_is_active() ) {
+            $disbled = 'disabled="disabled"';
+        }
+
         ?>
         <form action="" method="post">
             <input type="hidden" name="ncm_elementor_cleanup_form_entries_nonce" value="<?php echo wp_create_nonce( 'ncm_elementor_cleanup_form_entries_nonce' ); ?>" />
-            <input class="button button-primary" type="submit" name="ncm_elementor_cleanup_form_entries_delete" value="<?php echo __( 'Delete all form entries older then', 'ncm-elementor-cleanup-form-entries' ).' '.$days.' '.__( 'days', 'ncm-elementor-cleanup-form-entries' ); ?>" />
+            <input class="button button-primary" type="submit" name="ncm_elementor_cleanup_form_entries_delete" <?php echo $disbled; ?> value="<?php echo __( 'Delete all form entries older then', 'ncm-elementor-cleanup-form-entries' ).' '.$days.' '.__( 'days', 'ncm-elementor-cleanup-form-entries' ); ?>" />
         </form>
         <?php
 
