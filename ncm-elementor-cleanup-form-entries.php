@@ -132,7 +132,7 @@ class ncm_elementor_cleanup_form_entries {
 
         // if button is clicked, delete all form entries older than selected days.
         if ( isset( $_POST['ncm_elementor_cleanup_form_entries_delete'] ) && check_admin_referer( 'ncm_elementor_cleanup_form_entries_nonce', 'ncm_elementor_cleanup_form_entries_nonce' ) ) {
-            // ncm_elementor_cleanup_form_entries_delete_entries();
+            $this->entries_delete_entries();
             echo '<p>' . esc_html__( 'All form entries older than selected days have been deleted.', 'ncm-elementor-cleanup-form-entries' ) . '</p>';
         }
     }
