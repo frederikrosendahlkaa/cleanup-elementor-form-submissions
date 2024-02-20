@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Cleanup Elementor form submissions\n"
-"POT-Creation-Date: 2024-02-20 18:06+0100\n"
-"PO-Revision-Date: 2024-02-20 18:06+0100\n"
+"POT-Creation-Date: 2024-02-20 18:37+0100\n"
+"PO-Revision-Date: 2024-02-20 18:38+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: da\n"
@@ -20,54 +20,60 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: *.min.js\n"
 
-#: includes/settings.php:70
+#: includes/settings.php:72
 msgid "Settings"
 msgstr "Instillinger"
 
+#: includes/settings.php:91
+msgid "Thank you for using Cleanup Elementor form submissions plugin."
+msgstr ""
+"Tak, fordi du brugte pluginet Cleanup Elementor til formularindsendelser."
+
 #. Plugin Name of the plugin/theme
-#: includes/settings.php:80 includes/settings.php:81 includes/settings.php:104
+#: includes/settings.php:103 includes/settings.php:104
+#: includes/settings.php:127
 msgid "Cleanup Elementor form submissions"
 msgstr "Oprydning af Elementor formularindsendelser"
 
-#: includes/settings.php:135
+#: includes/settings.php:158
 msgid "Delete all form submissions older then"
 msgstr "Slet alle formularindsendelser, der er ældre end "
 
-#: includes/settings.php:142
+#: includes/settings.php:165
 msgid "All form submissions older than selected days have been deleted."
 msgstr ""
 "Alle formularindsendelser, der er ældre end de valgte dage, er blevet "
 "slettet."
 
-#: includes/settings.php:152
+#: includes/settings.php:175
 msgid "Activate Cleanup"
 msgstr "Aktivér oprydning"
 
-#: includes/settings.php:153
+#: includes/settings.php:176
 msgid "How long submissions must be kept"
 msgstr "Hvor længe skal formularindsendelser gemmes"
 
-#: includes/settings.php:203
+#: includes/settings.php:226
 msgid "Hours"
 msgstr "Timer"
 
-#: includes/settings.php:204
+#: includes/settings.php:227
 msgid "Days"
 msgstr "Dage"
 
-#: includes/settings.php:205
+#: includes/settings.php:228
 msgid "Weeks"
 msgstr "Uger"
 
-#: includes/settings.php:206
+#: includes/settings.php:229
 msgid "Months"
 msgstr "Måneder"
 
-#: includes/settings.php:207
+#: includes/settings.php:230
 msgid "Quaters"
 msgstr "kvartaler"
 
-#: includes/settings.php:208
+#: includes/settings.php:231
 msgid "Years"
 msgstr "År"
 
