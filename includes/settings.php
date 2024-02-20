@@ -1,5 +1,5 @@
 <?php
-namespace NCM\CleanupElementorFormSubmissions;
+namespace NCM\CEFS;
 
 if ( !class_exists( 'CleanupElementorFormSubmissions' ) ) {
 
@@ -20,8 +20,6 @@ if ( !class_exists( 'CleanupElementorFormSubmissions' ) ) {
             register_activation_hook( __FILE__, array( $this, 'plugins_activation' ) );
     
             register_deactivation_hook( __FILE__, array( $this, 'plugin_deactivation' ) );
-
-            register_uninstall_hook( __FILE__, array( $this, 'plugin_uninstall' ) );
     
             add_action( 'init', array( $this, 'load_textdomain' ) );
     
@@ -321,4 +319,7 @@ if ( !class_exists( 'CleanupElementorFormSubmissions' ) ) {
     }
 
     new CleanupElementorFormSubmissions();
+
+    //uninstall plugin
+    register_uninstall_hook( __FILE__, array( 'NCM\CEFS\CleanupElementorFormSubmissions', 'plugin_uninstall' ) );
 }
