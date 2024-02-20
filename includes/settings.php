@@ -23,11 +23,13 @@ if ( !class_exists( 'CleanupElementorFormSubmissions' ) ) {
     
             add_action( 'init', array( $this, 'load_textdomain' ) );
     
+            add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 11, 1);
+
             add_action( 'admin_menu', array( $this, 'add_menu_item' ) );
     
             add_action( 'admin_init', array( $this, 'cleanup_form_submissions_settings' ) );
     
-            add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'plugin_action_links' ) );
+            add_filter( 'plugin_action_links_' . CEFS_PLUGIN_BASENAME, array( $this, 'plugin_action_links' ) );
     
             add_action( 'wp', array( $this, 'submissions_schedule_event' ) );
     
@@ -69,6 +71,27 @@ if ( !class_exists( 'CleanupElementorFormSubmissions' ) ) {
         public function plugin_action_links( $links ) {
             $links[] = '<a href="' . esc_url( admin_url( 'tools.php?page=cleanup-elementor-form-submissions' ) ) . '">' . esc_html__( 'Settings', 'cleanup-elementor-form-submissions' ) . '</a>';
             return $links;
+        }
+
+        /**
+         * Add information to the plugin page footer.
+         */
+        public function admin_footer_text( $footer_text ) {
+
+            $current_screen = get_current_screen();
+
+            if ( !$current_screen ) {
+                return;
+            }
+
+            if ( $current_screen->id != 'tools_page_cleanup-elementor-form-submissions' ) {
+                return;
+            }
+
+            $footer_text = __( 'Thank you for using Cleanup Elementor form submissions plugin.', 'cleanup-elementor-form-submissions' );
+            $footer_text .= ' | <a href="https://nordiccustommade.dk" target="_blank">Nordic Custom Made</a>';
+
+            return $footer_text;
         }
 
         /**
