@@ -1,11 +1,11 @@
 <?php
 /**
- * Plugin Name: Elementor Cleanup Form Entries
- * Description: Cleanup Elementor Form Entries older than selected days | Default 30 days | Runs every 1 hour.
+ * Plugin Name: Cleanup Elementor form submissions
+ * Description: Cleanup Elementor form submissions older than selected days
  * Version: 1.0.0
  * Author: Nordic Custom Made
  * Author URI: https://nordiccustommade.dk
- * Text Domain: ncm-elementor-cleanup-form-entries
+ * Text Domain: cleanup-elementor-form-submissions
  * Domain Path: /languages
  * Requires Plugins: elementor, elementor-pro
  * License: GPL2
@@ -17,12 +17,12 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-//create class ncm_elementor_cleanup_form_entries
-class ncm_elementor_cleanup_form_entries {
+//create class cleanup_elementor_form_submissions
+class cleanup_elementor_form_submissions {
     
     //private
     private $options;
-    public $options_name = 'ncm_elementor_cleanup_form_entries_settings';
+    public $options_name = 'cleanup_elementor_form_submissions_settings';
     
     public function __construct() {
 
@@ -39,13 +39,13 @@ class ncm_elementor_cleanup_form_entries {
 
         add_action( 'admin_menu', array( $this, 'add_menu_item' ) );
 
-        add_action( 'admin_init', array( $this, 'cleanup_form_entries_settings' ) );
+        add_action( 'admin_init', array( $this, 'cleanup_form_submissions_settings' ) );
 
         add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'plugin_action_links' ) );
 
-        add_action( 'wp', array( $this, 'entries_schedule_event' ) );
+        add_action( 'wp', array( $this, 'submissions_schedule_event' ) );
 
-        add_action( 'ncm_elementor_cleanup_form_entries_event', array( $this, 'entries_delete_entries' ) );
+        add_action( 'cleanup_elementor_form_submissions_event', array( $this, 'delete_submissions' ) );
 
     }
 
@@ -65,40 +65,40 @@ class ncm_elementor_cleanup_form_entries {
 
     //deactivate plugin
     public function plugin_deactivation() {
-        wp_clear_scheduled_hook( 'ncm_elementor_cleanup_form_entries_event' );
+        wp_clear_scheduled_hook( 'cleanup_elementor_form_submissions_event' );
         // delete option $this->options_name
         delete_option( $this->options_name );
     }
 
     //load plugin textdomain
     public function load_textdomain() {
-        load_plugin_textdomain( 'ncm-elementor-cleanup-form-entries', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+        load_plugin_textdomain( 'cleanup-elementor-form-submissions', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
     }
 
     //add a link to the plugin settings page.
     public function plugin_action_links( $links ) {
-        $links[] = '<a href="' . esc_url( admin_url( 'tools.php?page=ncm-elementor-cleanup-form-entries' ) ) . '">' . esc_html__( 'Settings', 'ncm-elementor-cleanup-form-entries' ) . '</a>';
+        $links[] = '<a href="' . esc_url( admin_url( 'tools.php?page=cleanup-elementor-form-submissions' ) ) . '">' . esc_html__( 'Settings', 'cleanup-elementor-form-submissions' ) . '</a>';
         return $links;
     }
 
     /**
      * add a submenu page under the "tools" admin menu.
-     * This page will be used to manually delete all form entries and select the number of days to keep.
+     * This page will be used to manually delete all form submissions and select the number of days to keep.
      */
     public function add_menu_item() {
         add_management_page(
-            esc_html__( 'Cleanup Elementor Form Entries', 'ncm-elementor-cleanup-form-entries' ),
-            esc_html__( 'Cleanup Elementor Form Entries', 'ncm-elementor-cleanup-form-entries' ),
+            esc_html__( 'Cleanup Elementor Form submissions', 'cleanup-elementor-form-submissions' ),
+            esc_html__( 'Cleanup Elementor Form submissions', 'cleanup-elementor-form-submissions' ),
             'manage_options',
-            'ncm-elementor-cleanup-form-entries',
-            array( $this, 'cleanup_form_entries_page' )
+            'cleanup-elementor-form-submissions',
+            array( $this, 'cleanup_form_submissions_page' )
         );
     }
 
     /**
-     * Cleanup Form Entries page.
+     * Cleanup Form submissions page.
      */
-    public function cleanup_form_entries_page () {
+    public function cleanup_form_submissions_page () {
 
         // if elementor or elementor pro is not active, don't proceed.
         if ( ! did_action( 'elementor/loaded' ) ) {
@@ -111,20 +111,20 @@ class ncm_elementor_cleanup_form_entries {
         }
 
         //add page title
-        echo '<h1>' . esc_html__( 'Cleanup Elementor Form Entries', 'ncm-elementor-cleanup-form-entries' ) . '</h1>';
+        echo '<h1>' . esc_html__( 'Cleanup Elementor Form submissions', 'cleanup-elementor-form-submissions' ) . '</h1>';
 
         //add form to select the number of days to keep.
         ?>
         <form action="options.php" method="post">
             <?php
-            settings_fields( 'cleanup_form_entries_settings' );
-            do_settings_sections( 'cleanup_form_entries_settings' );
+            settings_fields( 'cleanup_form_submissions_settings' );
+            do_settings_sections( 'cleanup_form_submissions_settings' );
             submit_button();
             ?>
         </form>
         <?php   
 
-        //add button to manually delete all form entries older than selected days.
+        //add button to manually delete all form submissions older than selected days.
         $options = $this->options;
         $keep_info = '';
         if ( $options AND is_array( $options ) AND key_exists( 'scheduled', $options ) ) {
@@ -141,26 +141,26 @@ class ncm_elementor_cleanup_form_entries {
 
         ?>
         <form action="" method="post">
-            <input type="hidden" name="ncm_elementor_cleanup_form_entries_nonce" value="<?php echo wp_create_nonce( 'ncm_elementor_cleanup_form_entries_nonce' ); ?>" />
-            <input class="button button-primary" type="submit" name="ncm_elementor_cleanup_form_entries_delete" <?php echo $disbled; ?> value="<?php echo __( 'Delete all form entries older then', 'ncm-elementor-cleanup-form-entries' ).' '.$keep_info; ?>" />
+            <input type="hidden" name="cleanup_elementor_form_submissions_nonce" value="<?php echo wp_create_nonce( 'cleanup_elementor_form_submissions_nonce' ); ?>" />
+            <input class="button button-primary" type="submit" name="cleanup_elementor_form_submissions_delete" <?php echo $disbled; ?> value="<?php echo __( 'Delete all form submissions older then', 'cleanup-elementor-form-submissions' ).' '.$keep_info; ?>" />
         </form>
         <?php
 
-        // if button is clicked, delete all form entries older than selected days.
-        if ( isset( $_POST['ncm_elementor_cleanup_form_entries_delete'] ) && check_admin_referer( 'ncm_elementor_cleanup_form_entries_nonce', 'ncm_elementor_cleanup_form_entries_nonce' ) ) {
-            $this->entries_delete_entries();
-            echo '<p>' . esc_html__( 'All form entries older than selected days have been deleted.', 'ncm-elementor-cleanup-form-entries' ) . '</p>';
+        // if button is clicked, delete all form submissions older than selected days.
+        if ( isset( $_POST['cleanup_elementor_form_submissions_delete'] ) && check_admin_referer( 'cleanup_elementor_form_submissions_nonce', 'cleanup_elementor_form_submissions_nonce' ) ) {
+            $this->submissions_delete_submissions();
+            echo '<p>' . esc_html__( 'All form submissions older than selected days have been deleted.', 'cleanup-elementor-form-submissions' ) . '</p>';
         }
     }
 
     /**
      * Register settings.
      */
-    public function cleanup_form_entries_settings() {
-        register_setting( 'cleanup_form_entries_settings', $this->options_name, array( $this, 'sanitize_settings' ) );
-        add_settings_section( 'cleanup_form_entries_settings_section', '', '', 'cleanup_form_entries_settings' );
-        add_settings_field( 'cleanup_form_entries_field_activate', esc_html__( 'Activate Cleanup', 'ncm-elementor-cleanup-form-entries' ), array( $this, 'setting_field_activate' ), 'cleanup_form_entries_settings', 'cleanup_form_entries_settings_section' );
-        add_settings_field( 'cleanup_form_entries_settings_field', esc_html__( 'How long submissions must be kept', 'ncm-elementor-cleanup-form-entries' ), array( $this, 'cleanup_form_entries_settings_field' ), 'cleanup_form_entries_settings', 'cleanup_form_entries_settings_section' );
+    public function cleanup_form_submissions_settings() {
+        register_setting( 'cleanup_form_submissions_settings', $this->options_name, array( $this, 'sanitize_settings' ) );
+        add_settings_section( 'cleanup_form_submissions_settings_section', '', '', 'cleanup_form_submissions_settings' );
+        add_settings_field( 'cleanup_form_submissions_field_activate', esc_html__( 'Activate Cleanup', 'cleanup-elementor-form-submissions' ), array( $this, 'setting_field_activate' ), 'cleanup_form_submissions_settings', 'cleanup_form_submissions_settings_section' );
+        add_settings_field( 'cleanup_form_submissions_settings_field', esc_html__( 'How long submissions must be kept', 'cleanup-elementor-form-submissions' ), array( $this, 'cleanup_form_submissions_settings_field' ), 'cleanup_form_submissions_settings', 'cleanup_form_submissions_settings_section' );
     }
 
     //function to check if cleanup is active.
@@ -189,7 +189,7 @@ class ncm_elementor_cleanup_form_entries {
     /**
      * Settings field.
      */
-    public function cleanup_form_entries_settings_field() {
+    public function cleanup_form_submissions_settings_field() {
 
         $value = 30;
         $type = 'days';
@@ -210,32 +210,32 @@ class ncm_elementor_cleanup_form_entries {
         ?>
         <input type="number" name="<?php echo $this->options_name; ?>[scheduled][value]" value="<?php echo esc_attr( $value ); ?>" min="1" />
         <select name="<?php echo $this->options_name; ?>[scheduled][type]">
-            <option value="hours" <?php selected( $type, 'hours' ); ?>><?php echo esc_html__( 'Hours', 'ncm-elementor-cleanup-form-entries' ); ?></option>
-            <option value="days" <?php selected( $type, 'days' ); ?>><?php echo esc_html__( 'Days', 'ncm-elementor-cleanup-form-entries' ); ?></option>
-            <option value="weeks" <?php selected( $type, 'weeks' ); ?>><?php echo esc_html__( 'Weeks', 'ncm-elementor-cleanup-form-entries' ); ?></option>
-            <option value="months" <?php selected( $type, 'months' ); ?>><?php echo esc_html__( 'Months', 'ncm-elementor-cleanup-form-entries' ); ?></option>
-            <option value="quaters" <?php selected( $type, 'quaters' ); ?>><?php echo esc_html__( 'Quaters', 'ncm-elementor-cleanup-form-entries' ); ?></option>
-            <option value="years" <?php selected( $type, 'years' ); ?>><?php echo esc_html__( 'Years', 'ncm-elementor-cleanup-form-entries' ); ?></option>
+            <option value="hours" <?php selected( $type, 'hours' ); ?>><?php echo esc_html__( 'Hours', 'cleanup-elementor-form-submissions' ); ?></option>
+            <option value="days" <?php selected( $type, 'days' ); ?>><?php echo esc_html__( 'Days', 'cleanup-elementor-form-submissions' ); ?></option>
+            <option value="weeks" <?php selected( $type, 'weeks' ); ?>><?php echo esc_html__( 'Weeks', 'cleanup-elementor-form-submissions' ); ?></option>
+            <option value="months" <?php selected( $type, 'months' ); ?>><?php echo esc_html__( 'Months', 'cleanup-elementor-form-submissions' ); ?></option>
+            <option value="quaters" <?php selected( $type, 'quaters' ); ?>><?php echo esc_html__( 'Quaters', 'cleanup-elementor-form-submissions' ); ?></option>
+            <option value="years" <?php selected( $type, 'years' ); ?>><?php echo esc_html__( 'Years', 'cleanup-elementor-form-submissions' ); ?></option>
         </select>
         <?php
     }
 
     // Schedule an action if it's not already scheduled.
-    public function entries_schedule_event() {
+    public function submissions_schedule_event() {
 
         //if cleanup is not active, don't proceed.
         if ( !$this->check_if_cleanup_is_active() ) {
-            wp_clear_scheduled_hook( 'ncm_elementor_cleanup_form_entries_event' );
+            wp_clear_scheduled_hook( 'cleanup_elementor_form_submissions_event' );
             return;
         }
 
-        if ( ! wp_next_scheduled( 'ncm_elementor_cleanup_form_entries_event' ) ) {
-            wp_schedule_event( time(), 'hourly', 'ncm_elementor_cleanup_form_entries_event' );
+        if ( ! wp_next_scheduled( 'cleanup_elementor_form_submissions_event' ) ) {
+            wp_schedule_event( time(), 'hourly', 'cleanup_elementor_form_submissions_event' );
         }
     }
 
-    //delete all form entries older than selected days.
-    public function entries_delete_entries() {
+    //delete all form submissions older than selected days.
+    public function delete_submissions() {
         // if elementor or elementor pro is not active, don't proceed.
         if ( ! did_action( 'elementor/loaded' ) ) {
             return;
@@ -296,11 +296,11 @@ class ncm_elementor_cleanup_form_entries {
             return;
         }
 
-        //get list of ids of form entries older than selected $scheduled_value $scheduled_type.
+        //get list of ids of form submissions older than selected $scheduled_value $scheduled_type.
         $sql = "SELECT id FROM $table_name WHERE created_at < DATE_SUB( NOW(), INTERVAL $scheduled_value $scheduled_type )";
         $ids = $wpdb->get_col( $sql );
 
-        //delete form entries older than selected $scheduled_value $scheduled_type.
+        //delete form submissions older than selected $scheduled_value $scheduled_type.
 
         if ( !$ids OR !is_array( $ids ) OR count( $ids ) == 0 ) {
             return;
@@ -329,4 +329,4 @@ class ncm_elementor_cleanup_form_entries {
 
 }
 
-new ncm_elementor_cleanup_form_entries();
+new cleanup_elementor_form_submissions();
