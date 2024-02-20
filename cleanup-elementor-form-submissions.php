@@ -17,4 +17,12 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+// Define constants.
+define( 'CEFS_VERSION', '1.0.0' );
+define( 'CEFS_PLUGIN_FILE', __FILE__ );
+define( 'CEFS_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
+define( 'CEFS_PLUGIN_DIR_PATH', plugin_dir_path( __FILE__ ) );
+define( 'CEFS_PLUGIN_DIR_URL', plugin_dir_url( __FILE__ ) );
+
+
 require_once plugin_dir_path( __FILE__ ) . 'includes/settings.php';

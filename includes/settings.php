@@ -7,7 +7,7 @@ if ( !class_exists( 'CleanupElementorFormSubmissions' ) ) {
     
         // Class properties
         private $options;
-        public $options_name = 'cleanup_elementor_form_submissions_settings';
+        public $options_name = 'cefs_cleanup_elementor_form_submissions_settings';
 
         // Constructor
         public function __construct() {
@@ -62,7 +62,7 @@ if ( !class_exists( 'CleanupElementorFormSubmissions' ) ) {
 
         //load plugin textdomain
         public function load_textdomain() {
-            load_plugin_textdomain( 'cleanup-elementor-form-submissions', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+            load_plugin_textdomain( 'cleanup-elementor-form-submissions', false, dirname( CEFS_PLUGIN_BASENAME ) . '/languages' );
         }
 
         //add a link to the plugin settings page.
@@ -77,8 +77,8 @@ if ( !class_exists( 'CleanupElementorFormSubmissions' ) ) {
          */
         public function add_menu_item() {
             add_management_page(
-                esc_html__( 'Cleanup Elementor Form submissions', 'cleanup-elementor-form-submissions' ),
-                esc_html__( 'Cleanup Elementor Form submissions', 'cleanup-elementor-form-submissions' ),
+                esc_html__( 'Cleanup Elementor form submissions', 'cleanup-elementor-form-submissions' ),
+                esc_html__( 'Cleanup Elementor form submissions', 'cleanup-elementor-form-submissions' ),
                 'manage_options',
                 'cleanup-elementor-form-submissions',
                 array( $this, 'cleanup_form_submissions_page' )
@@ -101,7 +101,7 @@ if ( !class_exists( 'CleanupElementorFormSubmissions' ) ) {
             }
 
             //add page title
-            echo '<h1>' . esc_html__( 'Cleanup Elementor Form submissions', 'cleanup-elementor-form-submissions' ) . '</h1>';
+            echo '<h1>' . esc_html__( 'Cleanup Elementor form submissions', 'cleanup-elementor-form-submissions' ) . '</h1>';
 
             //add form to select the number of days to keep.
             ?>
@@ -321,5 +321,5 @@ if ( !class_exists( 'CleanupElementorFormSubmissions' ) ) {
     new CleanupElementorFormSubmissions();
 
     //uninstall plugin
-    register_uninstall_hook( __FILE__, array( 'NCM\CEFS\CleanupElementorFormSubmissions', 'plugin_uninstall' ) );
+    // register_uninstall_hook( __FILE__, array( 'NCM\CEFS\CleanupElementorFormSubmissions', 'plugin_uninstall' ) );
 }
