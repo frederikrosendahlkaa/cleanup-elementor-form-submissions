@@ -15,9 +15,9 @@ if ( !class_exists( 'CleanupElementorFormSubmissions' ) ) {
                 $this->options = get_option( $this->options_name );
             }
     
-            register_activation_hook( __FILE__, array( $this, 'plugins_activation' ) );
+            register_activation_hook( CEFS_PLUGIN_FILE, array( $this, 'plugins_activation' ) );
     
-            register_deactivation_hook( __FILE__, array( $this, 'plugin_deactivation' ) );
+            register_deactivation_hook( CEFS_PLUGIN_FILE, array( $this, 'plugin_deactivation' ) );
     
             add_action( 'init', array( $this, 'load_textdomain' ) );
     
