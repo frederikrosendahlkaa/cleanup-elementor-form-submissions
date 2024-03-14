@@ -152,7 +152,7 @@ if ( !class_exists( 'CleanupElementorFormSubmissions' ) ) {
 
             // if button is clicked, delete all form submissions older than selected days.
             if ( isset( $_POST['cleanup_elementor_form_submissions_delete'] ) && check_admin_referer( 'cleanup_elementor_form_submissions_nonce', 'cleanup_elementor_form_submissions_nonce' ) ) {
-                $this->submissions_delete_submissions();
+                $this->delete_submissions();
                 echo '<p>' . esc_html__( 'All form submissions older than selected days have been deleted.', 'cleanup-elementor-form-submissions' ) . '</p>';
             }
         }
@@ -163,7 +163,7 @@ if ( !class_exists( 'CleanupElementorFormSubmissions' ) ) {
         public function cleanup_form_submissions_settings() {
             register_setting( 'cleanup_form_submissions_settings', $this->options_name, array( $this, 'sanitize_settings' ) );
             add_settings_section( 'cleanup_form_submissions_settings_section', '', '', 'cleanup_form_submissions_settings' );
-            add_settings_field( 'cleanup_form_submissions_field_activate', esc_html__( 'Activate Cleanup', 'cleanup-elementor-form-submissions' ), array( $this, 'setting_field_activate' ), 'cleanup_form_submissions_settings', 'cleanup_form_submissions_settings_section' );
+            add_settings_field( 'cleanup_form_submissions_field_activate', esc_html__( 'Activate automatic Cleanup', 'cleanup-elementor-form-submissions' ), array( $this, 'setting_field_activate' ), 'cleanup_form_submissions_settings', 'cleanup_form_submissions_settings_section' );
             add_settings_field( 'cleanup_form_submissions_settings_field', esc_html__( 'How long submissions must be kept', 'cleanup-elementor-form-submissions' ), array( $this, 'cleanup_form_submissions_settings_field' ), 'cleanup_form_submissions_settings', 'cleanup_form_submissions_settings_section' );
         }
 

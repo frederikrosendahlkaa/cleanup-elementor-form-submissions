@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Cleanup Elementor form submissions\n"
-"POT-Creation-Date: 2024-02-20 18:37+0100\n"
+"POT-Creation-Date: 2024-03-14 11:01+0100\n"
 "PO-Revision-Date: 2024-02-20 17:59+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -21,57 +21,57 @@ msgstr ""
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: *.min.js\n"
 
-#: includes/settings.php:72
+#: includes/settings.php:63
 msgid "Settings"
 msgstr ""
 
-#: includes/settings.php:91
+#: includes/settings.php:82
 msgid "Thank you for using Cleanup Elementor form submissions plugin."
 msgstr ""
 
 #. Plugin Name of the plugin/theme
-#: includes/settings.php:103 includes/settings.php:104
-#: includes/settings.php:127
+#: includes/settings.php:94 includes/settings.php:95
+#: includes/settings.php:118
 msgid "Cleanup Elementor form submissions"
 msgstr ""
 
-#: includes/settings.php:158
+#: includes/settings.php:149
 msgid "Delete all form submissions older then"
 msgstr ""
 
-#: includes/settings.php:165
+#: includes/settings.php:156
 msgid "All form submissions older than selected days have been deleted."
 msgstr ""
 
-#: includes/settings.php:175
-msgid "Activate Cleanup"
+#: includes/settings.php:166
+msgid "Activate automatic Cleanup"
 msgstr ""
 
-#: includes/settings.php:176
+#: includes/settings.php:167
 msgid "How long submissions must be kept"
 msgstr ""
 
-#: includes/settings.php:226
+#: includes/settings.php:217
 msgid "Hours"
 msgstr ""
 
-#: includes/settings.php:227
+#: includes/settings.php:218
 msgid "Days"
 msgstr ""
 
-#: includes/settings.php:228
+#: includes/settings.php:219
 msgid "Weeks"
 msgstr ""
 
-#: includes/settings.php:229
+#: includes/settings.php:220
 msgid "Months"
 msgstr ""
 
-#: includes/settings.php:230
+#: includes/settings.php:221
 msgid "Quaters"
 msgstr ""
 
-#: includes/settings.php:231
+#: includes/settings.php:222
 msgid "Years"
 msgstr ""
 
