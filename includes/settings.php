@@ -23,6 +23,8 @@ if ( !class_exists( 'CleanupElementorFormSubmissions' ) ) {
     
             add_filter( 'admin_footer_text', array( $this, 'admin_footer_text' ), 11, 1);
 
+            add_action( 'admin_head', array( $this, 'add_custom_css' ) );
+
             add_action( 'admin_menu', array( $this, 'add_menu_item' ) );
     
             add_action( 'admin_init', array( $this, 'cleanup_form_submissions_settings' ) );
@@ -86,6 +88,36 @@ if ( !class_exists( 'CleanupElementorFormSubmissions' ) ) {
         }
 
         /**
+         * Add custom css to the plugin settings page.
+         */
+        public function add_custom_css() {
+            $current_screen = get_current_screen();
+
+            if ( !$current_screen ) {
+                return;
+            }
+
+            if ( $current_screen->id != 'tools_page_cleanup-elementor-form-submissions' ) {
+                return;
+            }
+
+            ?>
+            <style>
+                .button-color-red {
+                    background-color: #dc3232 !important;
+                    border-color: #dc3232 !important;
+                    color: #fff !important;
+                }
+                .button-color-red:hover {
+                    background-color: #b71b1b !important;
+                    border-color: #b71b1b !important;
+                    color: #fff !important;
+                }
+            </style>
+            <?php
+        }
+
+        /**
          * add a submenu page under the "tools" admin menu.
          * This page will be used to manually delete all form submissions and select the number of days to keep.
          */
@@ -137,22 +169,16 @@ if ( !class_exists( 'CleanupElementorFormSubmissions' ) ) {
                 }
             }
 
-            //if cleanup is not active set cleanup button to disabled.
-            $disbled = '';
-            if ( !$this->check_if_cleanup_is_active() ) {
-                $disbled = 'disabled="disabled"';
-            }
-
             ?>
             <form action="" method="post">
                 <input type="hidden" name="cleanup_elementor_form_submissions_nonce" value="<?php echo wp_create_nonce( 'cleanup_elementor_form_submissions_nonce' ); ?>" />
-                <input class="button button-primary" type="submit" name="cleanup_elementor_form_submissions_delete" <?php echo $disbled; ?> value="<?php echo __( 'Delete all form submissions older then', 'cleanup-elementor-form-submissions' ).' '.$keep_info; ?>" />
+                <input class="button button-secondary button-color-red" type="submit" name="cleanup_elementor_form_submissions_delete" <?php echo $disbled; ?> value="<?php echo __( 'Delete all form submissions older then', 'cleanup-elementor-form-submissions' ).' '.$keep_info; ?>" />
             </form>
             <?php
 
             // if button is clicked, delete all form submissions older than selected days.
             if ( isset( $_POST['cleanup_elementor_form_submissions_delete'] ) && check_admin_referer( 'cleanup_elementor_form_submissions_nonce', 'cleanup_elementor_form_submissions_nonce' ) ) {
-                $this->delete_submissions();
+                $this->delete_submissions( true );
                 echo '<p>' . esc_html__( 'All form submissions older than selected days have been deleted.', 'cleanup-elementor-form-submissions' ) . '</p>';
             }
         }
@@ -239,14 +265,14 @@ if ( !class_exists( 'CleanupElementorFormSubmissions' ) ) {
         }
 
         //delete all form submissions older than selected days.
-        public function delete_submissions() {
+        public function delete_submissions( $skip_check = false ) {
             // if elementor or elementor pro is not active, don't proceed.
             if ( ! did_action( 'elementor/loaded' ) ) {
                 return;
             }
 
             // if cleanup is not active, don't proceed.
-            if ( !$this->check_if_cleanup_is_active() ) {
+            if ( !$this->check_if_cleanup_is_active() AND !$skip_check) {
                 return;
             }
 
