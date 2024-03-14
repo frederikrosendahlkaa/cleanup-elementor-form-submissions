@@ -18,8 +18,6 @@ if ( !class_exists( 'CleanupElementorFormSubmissions' ) ) {
             register_activation_hook( CEFS_PLUGIN_FILE, array( $this, 'plugins_activation' ) );
     
             register_deactivation_hook( CEFS_PLUGIN_FILE, array( $this, 'plugin_deactivation' ) );
-
-            register_uninstall_hook( CEFS_PLUGIN_FILE, array( $this, 'plugin_uninstall' ) );
     
             add_action( 'init', array( $this, 'load_textdomain' ) );
     
@@ -54,12 +52,6 @@ if ( !class_exists( 'CleanupElementorFormSubmissions' ) ) {
 
         //deactivate plugin
         public function plugin_deactivation() {
-            wp_clear_scheduled_hook( 'cleanup_elementor_form_submissions_event' );
-        }
-
-        //unstall plugin
-        public function plugin_uninstall() {
-            delete_option( $this->options_name );
             wp_clear_scheduled_hook( 'cleanup_elementor_form_submissions_event' );
         }
 
