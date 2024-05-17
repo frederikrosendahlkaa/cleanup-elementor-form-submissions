@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Cleanup Elementor form submissions
- * Description: Cleanup Elementor form submissions older than selected days
+ * Description: Cleanup Elementor Form submissions older the specified number of days, months etc.
  * Version: 1.0.0
  * Author: Nordic Custom Made
  * Author URI: https://nordiccustommade.dk
