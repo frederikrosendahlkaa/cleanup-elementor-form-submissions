@@ -1,4 +1,4 @@
-# ncm-elementor-cleanup-form-submissions
+# Cleanup Elementor Form submissions
 Cleanup Elementor Form submissions older the specified number of days, months etc.
 
 Automatic cleanup is not enabled by default. You need to enable it from the settings page (Tools > Cleanup Elementor form submissions).
